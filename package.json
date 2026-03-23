@@ -13,7 +13,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
-    "next": "15.2.4",
+    "next": "^16.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.6.0",
@@ -26,7 +26,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.175.0",
     "eslint": "^9",
-    "eslint-config-next": "15.2.4",
+    "eslint-config-next": "^16.2.1",
     "tailwindcss": "^4.0.0",
     "typescript": "^5"
   }
