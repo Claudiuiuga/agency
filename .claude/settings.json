@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(touch /d/agency/test.tmp)",
+      "Bash(rm /d/agency/test.tmp)"
+    ]
+  }
+}
