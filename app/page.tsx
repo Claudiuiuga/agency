@@ -12,6 +12,33 @@ import { LiquidButton } from "@/components/ui/liquid-glass-button"
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
+const HERO_PHRASES = [
+  "Marketing that converts.",
+  "Leads that close.",
+  "Automation that works.",
+  "Ads that pay off.",
+]
+
+const INTEGRATION_LOGOS = [
+  "GoHighLevel","Google Ads","Meta Ads","Google Business","Jobber",
+  "Stripe","Zapier","Twilio","OpenAI","Calendly","Google Analytics","Mailgun",
+]
+
+const INDUSTRY_DETAILS: Record<string, { headline: string; body: string; tags: string[] }> = {
+  "HVAC":        { headline: "Fill your HVAC calendar year-round",         body: "Emergency calls don't wait for business hours. We put you at the top of local search, run seasonal Google Ads, and have Aria book service appointments at 2 AM when the AC breaks down.",              tags: ["Emergency call routing","Seasonal ads","Review automation"] },
+  "Plumbing":    { headline: "Book more plumbing jobs, miss fewer leads",   body: "Most plumbing jobs go to whoever answers first. We make sure that's you — with a fast-loading site, targeted ads, and Aria booking the job while you're on the last one.",                         tags: ["Missed-call text-back","Google Ads","24/7 booking"] },
+  "Dental":      { headline: "Grow your patient list on autopilot",         body: "We build your practice website, run new-patient Google Ads, and automate appointment reminders so your chair stays full and no-shows stop draining revenue.",                                       tags: ["New patient ads","Appointment reminders","Review requests"] },
+  "Roofing":     { headline: "Storm season or slow season — stay booked",   body: "We keep your pipeline full with storm-targeted ads, a conversion-ready site, and automated follow-up that turns estimates into signed contracts before you leave the driveway.",                    tags: ["Storm targeting","Estimate follow-up","Lead automation"] },
+  "Electrical":  { headline: "Be the electrician homeowners find first",    body: "Panel upgrades, emergency calls, EV charger installs — we put your electrical business in front of local homeowners at the exact moment they need help, and Aria books the job.",                  tags: ["Local SEO","Google Ads","AI receptionist"] },
+  "Lawn Care":   { headline: "Build a recurring lawn care client base",     body: "We build your seasonal marketing engine — Google Ads for peak months, automated follow-ups for recurring clients, and a website that books estimates while your crew is in the field.",             tags: ["Seasonal campaigns","Recurring billing","Lead nurture"] },
+  "Windows":     { headline: "Turn window shoppers into signed projects",   body: "Window replacement is a big decision. We build trust with a premium website, run targeted ads to homeowners ready to buy, and automate follow-up so no estimate goes cold.",                      tags: ["High-intent ads","Estimate follow-up","Trust-building site"] },
+  "Cleaning":    { headline: "Scale your cleaning business with recurring clients", body: "One-time jobs are fine — recurring contracts are the goal. We build your brand, run ads that attract loyal clients, and automate the upsell from single clean to weekly service.",       tags: ["Recurring upsell","Google & Meta Ads","Review automation"] },
+  "Med Spa":     { headline: "Fill your treatment calendar every week",     body: "Med spa clients research before they book. We build a premium site that builds instant trust, run Instagram and Google ads, and automate reminder sequences that keep your chairs full.",          tags: ["Instagram ads","Appointment reminders","Premium branding"] },
+  "Pet Care":    { headline: "More bookings for boarding, grooming & training", body: "Pet owners are loyal when they trust you. We build your brand, run local ads, and set up automated follow-ups that turn a first grooming into a lifetime client.",                           tags: ["Loyalty automation","Local ads","Review requests"] },
+  "Auto Repair": { headline: "Get more cars in your bays",                  body: "Car trouble is urgent — and customers go with whoever shows up first in search. We make sure that's your shop, with a fast site, local ads, and Aria booking while you're under the hood.",      tags: ["Emergency search ads","Missed-call text-back","Google Maps"] },
+  "Healthcare":  { headline: "Grow your practice with consistent new patients", body: "Patients research online before they call. We build a compliant, conversion-ready website, run targeted ads, and automate follow-up reminders to reduce no-shows and grow your caseload.",   tags: ["HIPAA-aware setup","New patient ads","Appointment automation"] },
+}
+
 
 const FAQS = [
   { q: "What exactly do you build for me?",                            a: "Depending on your plan, we build and manage: a high-converting website, Google & Meta ad campaigns, a CRM & pipeline, automated SMS/email follow-up sequences, missed-call text-back, review request automation, and an AI receptionist. You don't need to hire a web developer, ad agency, or automation consultant separately." },
@@ -42,12 +69,15 @@ const CALL_LINES = [
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function Page() {
-  const [scrolled, setScrolled]     = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [openFaq, setOpenFaq]       = useState<number | null>(null)
-  const [callLine, setCallLine]     = useState(0)
-  const [callStarted, setCallStarted] = useState(false)
-  const [mousePos, setMousePos]     = useState({ x: -999, y: -999 })
+  const [scrolled, setScrolled]           = useState(false)
+  const [mobileOpen, setMobileOpen]       = useState(false)
+  const [openFaq, setOpenFaq]             = useState<number | null>(null)
+  const [callLine, setCallLine]           = useState(0)
+  const [callStarted, setCallStarted]     = useState(false)
+  const [mousePos, setMousePos]           = useState({ x: -999, y: -999 })
+  const [heroPhrase, setHeroPhrase]       = useState(0)
+  const [phraseVisible, setPhraseVisible] = useState(true)
+  const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null)
   const fuRefs = useRef<(HTMLElement | null)[]>([])
 
   useEffect(() => {
@@ -77,6 +107,18 @@ export default function Page() {
   useEffect(() => {
     const timer = setTimeout(() => setCallStarted(true), 1200)
     return () => clearTimeout(timer)
+  }, [])
+
+  // Rotate hero phrase
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhraseVisible(false)
+      setTimeout(() => {
+        setHeroPhrase((n) => (n + 1) % HERO_PHRASES.length)
+        setPhraseVisible(true)
+      }, 350)
+    }, 3000)
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
@@ -109,6 +151,11 @@ export default function Page() {
         .grain::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:999; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); opacity:.55; }
         .call-line { animation: typein .4s ease both; }
         .cursor { display:inline-block; animation:blink 1s step-end infinite; }
+        @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        .marquee-track { display:flex; animation:marquee 28s linear infinite; }
+        .marquee-track:hover { animation-play-state:paused; }
+        .phrase-in { animation:typein .35s ease both; }
+        .phrase-out { opacity:0; transform:translateY(-6px); transition:opacity .3s ease, transform .3s ease; }
       `}</style>
 
       <div className="grain" />
@@ -181,7 +228,9 @@ export default function Page() {
 
               <h1 className="font-[family-name:var(--font-playfair)] font-bold text-[clamp(2.8rem,5.5vw,5rem)] text-[#F0EFE8] leading-[1.06] tracking-tight mb-6">
                 Websites that wow.<br />
-                <em className="not-italic gold">Marketing that converts.</em>
+                <em className={`not-italic gold ${phraseVisible ? "phrase-in" : "phrase-out"}`}>
+                  {HERO_PHRASES[heroPhrase]}
+                </em>
               </h1>
 
               <div className="w-16 h-px shimmer mb-7" />
@@ -315,12 +364,17 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ── TRUST BAR ────────────────────────────────────────────── */}
-      <div className="border-y border-[rgba(139,92,246,0.08)] py-9" style={{ background: "rgba(139,92,246,0.02)" }}>
-        <div className="mx-auto max-w-[1200px] px-8 flex flex-wrap items-center justify-center gap-10 lg:gap-14">
-          {["3D Web Design","Google & Meta Ads","AI Receptionist","CRM & Automation","Reputation Management","Missed-Call Text-Back"].map((n) => (
-            <span key={n} className="text-[0.78rem] font-semibold text-[#3A3A38] hover:text-[#8A8880] transition-colors tracking-[0.08em] cursor-default">{n}</span>
-          ))}
+      {/* ── INTEGRATIONS MARQUEE ─────────────────────────────────── */}
+      <div className="border-y border-[rgba(139,92,246,0.08)] py-6 overflow-hidden" style={{ background: "rgba(139,92,246,0.02)" }}>
+        <p className="text-center text-[0.6rem] font-medium tracking-[0.22em] uppercase text-[#3A3A38] mb-5">Tools we use to build your system</p>
+        <div className="relative">
+          <div className="marquee-track gap-5" style={{ width: "max-content" }}>
+            {[...INTEGRATION_LOGOS, ...INTEGRATION_LOGOS].map((logo, i) => (
+              <span key={i} className="inline-flex items-center px-5 py-2 rounded-full border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.03)] text-[0.78rem] font-semibold text-[#4A4A48] tracking-wide whitespace-nowrap mx-2.5">
+                {logo}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -367,7 +421,7 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
             {[
               { icon:"🔧", name:"HVAC",        i:11, d:"0ms" },
               { icon:"🔩", name:"Plumbing",    i:12, d:"60ms" },
@@ -382,14 +436,53 @@ export default function Page() {
               { icon:"🚗", name:"Auto Repair", i:21, d:"300ms" },
               { icon:"🏥", name:"Healthcare",  i:22, d:"360ms" },
             ].map(({ icon, name, i, d }) => (
-              <div key={name} ref={ref(i)}
-                   className="fu group p-5 rounded-2xl border border-[rgba(139,92,246,0.10)] bg-[rgba(139,92,246,0.02)] hover:border-[rgba(139,92,246,0.28)] hover:bg-[rgba(139,92,246,0.06)] transition-all duration-400 text-center cursor-default"
+              <button key={name} ref={ref(i)}
+                   onClick={() => setSelectedIndustry(selectedIndustry === name ? null : name)}
+                   className={`fu group p-5 rounded-2xl border transition-all duration-300 text-center w-full ${
+                     selectedIndustry === name
+                       ? "border-[rgba(139,92,246,0.55)] bg-[rgba(139,92,246,0.10)]"
+                       : "border-[rgba(139,92,246,0.10)] bg-[rgba(139,92,246,0.02)] hover:border-[rgba(139,92,246,0.28)] hover:bg-[rgba(139,92,246,0.06)]"
+                   }`}
                    style={{ transitionDelay: d }}>
                 <div className="text-2xl mb-3">{icon}</div>
                 <div className="text-sm font-semibold text-[#F0EFE8] tracking-wide">{name}</div>
-              </div>
+              </button>
             ))}
           </div>
+
+          {/* Industry detail panel */}
+          {selectedIndustry && INDUSTRY_DETAILS[selectedIndustry] && (
+            <div className="phrase-in rounded-2xl border border-[rgba(139,92,246,0.22)] p-8 md:p-10"
+                 style={{ background: "rgba(139,92,246,0.04)" }}>
+              <div className="flex flex-col md:flex-row md:items-start gap-6">
+                <div className="flex-1">
+                  <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-[#F0EFE8] mb-3 leading-snug">
+                    {INDUSTRY_DETAILS[selectedIndustry].headline}
+                  </h3>
+                  <p className="text-[#8A8880] text-sm leading-relaxed font-light mb-5">
+                    {INDUSTRY_DETAILS[selectedIndustry].body}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {INDUSTRY_DETAILS[selectedIndustry].tags.map((tag) => (
+                      <span key={tag} className="px-3 py-1 rounded-full text-[0.72rem] font-medium border border-[rgba(139,92,246,0.22)] text-[#8B5CF6]"
+                            style={{ background: "rgba(139,92,246,0.06)" }}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <a href="#book"
+                   className="flex-shrink-0 self-start px-6 py-3 rounded-xl text-sm font-semibold text-white whitespace-nowrap transition-all duration-300 hover:brightness-110"
+                   style={{ background: "linear-gradient(135deg,#8B5CF6,#7C3AED)", boxShadow: "0 4px 20px rgba(139,92,246,0.30)" }}>
+                  Get a free estimate →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {!selectedIndustry && (
+            <p className="text-center text-[0.75rem] text-[#3A3A38] tracking-wide mt-2">
+              Click your industry to see what we build for you
+            </p>
+          )}
         </div>
       </section>
 
