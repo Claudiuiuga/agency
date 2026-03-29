@@ -137,7 +137,6 @@ export default function Page() {
             ))}
           </ul>
           <div className="hidden md:flex items-center gap-3">
-            <a href="#" className="text-[0.82rem] font-medium text-[#8A8880] hover:text-[#F0EFE8] transition-colors px-4 py-2">Sign In</a>
             <a href="#book">
               <LiquidButton size="sm" className="text-white font-semibold border-0 rounded-full text-[0.82rem] tracking-wide"
                 style={{ background: "linear-gradient(135deg,#8B5CF6,#7C3AED)" }}>
