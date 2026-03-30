@@ -154,8 +154,8 @@ export default function Page() {
         @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         .marquee-track { display:flex; animation:marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state:paused; }
-        .phrase-in { animation:typein .35s ease both; }
-        .phrase-out { opacity:0; transform:translateY(-6px); transition:opacity .3s ease, transform .3s ease; }
+        .phrase-in { animation:typein .35s ease both; display:inline-block; }
+        .phrase-out { opacity:0; transition:opacity .3s ease; display:inline-block; }
       `}</style>
 
       <div className="grain" />
@@ -228,9 +228,11 @@ export default function Page() {
 
               <h1 className="font-[family-name:var(--font-playfair)] font-bold text-[clamp(2.8rem,5.5vw,5rem)] text-[#F0EFE8] leading-[1.06] tracking-tight mb-6">
                 Websites that wow.<br />
-                <em className={`not-italic gold ${phraseVisible ? "phrase-in" : "phrase-out"}`}>
-                  {HERO_PHRASES[heroPhrase]}
-                </em>
+                <span className="block relative" style={{ height: "1.15em" }}>
+                  <em className={`not-italic gold absolute left-0 top-0 whitespace-nowrap ${phraseVisible ? "phrase-in" : "phrase-out"}`}>
+                    {HERO_PHRASES[heroPhrase]}
+                  </em>
+                </span>
               </h1>
 
               <div className="w-16 h-px shimmer mb-7" />
