@@ -229,7 +229,7 @@ export default function Page() {
               <h1 className="font-[family-name:var(--font-playfair)] font-bold text-[clamp(2.8rem,5.5vw,5rem)] text-[#F0EFE8] leading-[1.06] tracking-tight mb-6">
                 Websites that wow.<br />
                 <span className="block relative" style={{ height: "1.15em" }}>
-                  <em className={`not-italic gold absolute left-0 top-0 whitespace-nowrap ${phraseVisible ? "phrase-in" : "phrase-out"}`}>
+                  <em className={`not-italic gold absolute left-0 top-0 ${phraseVisible ? "phrase-in" : "phrase-out"}`}>
                     {HERO_PHRASES[heroPhrase]}
                   </em>
                 </span>
