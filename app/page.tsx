@@ -26,17 +26,13 @@ const INTEGRATION_LOGOS = [
 
 const INDUSTRY_DETAILS: Record<string, { headline: string; body: string; tags: string[] }> = {
   "HVAC":        { headline: "Fill your HVAC calendar year-round",         body: "Emergency calls don't wait for business hours. We put you at the top of local search, run seasonal Google Ads, and have Aria book service appointments at 2 AM when the AC breaks down.",              tags: ["Emergency call routing","Seasonal ads","Review automation"] },
-  "Plumbing":    { headline: "Book more plumbing jobs, miss fewer leads",   body: "Most plumbing jobs go to whoever answers first. We make sure that's you — with a fast-loading site, targeted ads, and Aria booking the job while you're on the last one.",                         tags: ["Missed-call text-back","Google Ads","24/7 booking"] },
-  "Dental":      { headline: "Grow your patient list on autopilot",         body: "We build your practice website, run new-patient Google Ads, and automate appointment reminders so your chair stays full and no-shows stop draining revenue.",                                       tags: ["New patient ads","Appointment reminders","Review requests"] },
-  "Roofing":     { headline: "Storm season or slow season — stay booked",   body: "We keep your pipeline full with storm-targeted ads, a conversion-ready site, and automated follow-up that turns estimates into signed contracts before you leave the driveway.",                    tags: ["Storm targeting","Estimate follow-up","Lead automation"] },
-  "Electrical":  { headline: "Be the electrician homeowners find first",    body: "Panel upgrades, emergency calls, EV charger installs — we put your electrical business in front of local homeowners at the exact moment they need help, and Aria books the job.",                  tags: ["Local SEO","Google Ads","AI receptionist"] },
-  "Lawn Care":   { headline: "Build a recurring lawn care client base",     body: "We build your seasonal marketing engine — Google Ads for peak months, automated follow-ups for recurring clients, and a website that books estimates while your crew is in the field.",             tags: ["Seasonal campaigns","Recurring billing","Lead nurture"] },
-  "Windows":     { headline: "Turn window shoppers into signed projects",   body: "Window replacement is a big decision. We build trust with a premium website, run targeted ads to homeowners ready to buy, and automate follow-up so no estimate goes cold.",                      tags: ["High-intent ads","Estimate follow-up","Trust-building site"] },
-  "Cleaning":    { headline: "Scale your cleaning business with recurring clients", body: "One-time jobs are fine — recurring contracts are the goal. We build your brand, run ads that attract loyal clients, and automate the upsell from single clean to weekly service.",       tags: ["Recurring upsell","Google & Meta Ads","Review automation"] },
-  "Med Spa":     { headline: "Fill your treatment calendar every week",     body: "Med spa clients research before they book. We build a premium site that builds instant trust, run Instagram and Google ads, and automate reminder sequences that keep your chairs full.",          tags: ["Instagram ads","Appointment reminders","Premium branding"] },
-  "Pet Care":    { headline: "More bookings for boarding, grooming & training", body: "Pet owners are loyal when they trust you. We build your brand, run local ads, and set up automated follow-ups that turn a first grooming into a lifetime client.",                           tags: ["Loyalty automation","Local ads","Review requests"] },
-  "Auto Repair": { headline: "Get more cars in your bays",                  body: "Car trouble is urgent — and customers go with whoever shows up first in search. We make sure that's your shop, with a fast site, local ads, and Aria booking while you're under the hood.",      tags: ["Emergency search ads","Missed-call text-back","Google Maps"] },
-  "Healthcare":  { headline: "Grow your practice with consistent new patients", body: "Patients research online before they call. We build a compliant, conversion-ready website, run targeted ads, and automate follow-up reminders to reduce no-shows and grow your caseload.",   tags: ["HIPAA-aware setup","New patient ads","Appointment automation"] },
+  "Dental":         { headline: "Grow your patient list on autopilot",            body: "We build your practice website, run new-patient Google Ads, and automate appointment reminders so your chair stays full and no-shows stop draining revenue.",                                       tags: ["New patient ads","Appointment reminders","Review requests"] },
+  "Roofing":        { headline: "Storm season or slow season — stay booked",      body: "We keep your pipeline full with storm-targeted ads, a conversion-ready site, and automated follow-up that turns estimates into signed contracts before you leave the driveway.",                    tags: ["Storm targeting","Estimate follow-up","Lead automation"] },
+  "Electrical":     { headline: "Be the electrician homeowners find first",       body: "Panel upgrades, emergency calls, EV charger installs — we put your electrical business in front of local homeowners at the exact moment they need help, and Aria books the job.",                  tags: ["Local SEO","Google Ads","AI receptionist"] },
+  "Windows":        { headline: "Turn window shoppers into signed projects",      body: "Window replacement is a big decision. We build trust with a premium website, run targeted ads to homeowners ready to buy, and automate follow-up so no estimate goes cold.",                      tags: ["High-intent ads","Estimate follow-up","Trust-building site"] },
+  "Med Spa":        { headline: "Fill your treatment calendar every week",        body: "Med spa clients research before they book. We build a premium site that builds instant trust, run Instagram and Google ads, and automate reminder sequences that keep your chairs full.",          tags: ["Instagram ads","Appointment reminders","Premium branding"] },
+  "Car Detailing":  { headline: "Book more premium details & coatings",           body: "Ceramic coatings, PPF, full corrections — high-ticket detailing sells on trust. We build a stunning portfolio site, run Google Ads to car owners ready to invest, and have Aria book jobs while you're in the bay.", tags: ["Portfolio site","High-intent Google Ads","Coating upsell automation"] },
+  "Healthcare":     { headline: "Grow your practice with consistent new patients", body: "Patients research online before they call. We build a compliant, conversion-ready website, run targeted ads, and automate follow-up reminders to reduce no-shows and grow your caseload.",   tags: ["HIPAA-aware setup","New patient ads","Appointment automation"] },
 }
 
 
@@ -49,7 +45,7 @@ const FAQS = [
   { q: "Is there a contract or setup fee?",                            a: "No setup fees and no long-term contracts. The Foundation plan is month-to-month. Booked Jobs and Growth System are custom engagements — we'll work out the right terms on your strategy call." },
   { q: "Do you work with businesses that already have a website?",     a: "Yes. If your existing website converts well, we'll keep it and focus on ads and automation. If it's hurting your conversion rate, we'll rebuild it. Either way, we audit everything before making recommendations." },
   { q: "What does 'custom pricing' actually mean?",                    a: "Custom pricing means we scope the project based on your market, ad budget, and goals — not a one-size-fits-all number. The Booked Jobs plan typically runs $600–$1,800/mo depending on your ad spend and market size. The Growth System, which adds the AI receptionist and advanced automations, typically runs $1,500–$3,500/mo. We'll give you an exact number on the strategy call — no vague proposals, no surprises." },
-  { q: "What areas or industries do you work in?",                     a: "We work with local service businesses across the US — HVAC, plumbing, electrical, roofing, dental, med spa, cleaning, lawn care, auto repair, pet care, and more. If you're a service business that books jobs or appointments, we can build your system. Geography isn't a barrier — we work remotely with businesses nationwide." },
+  { q: "What areas or industries do you work in?",                     a: "We work with high-ticket local service businesses across the US — HVAC, roofing, electrical, dental, med spa, windows, car detailing, healthcare, and more. If you're a service business that books jobs or appointments, we can build your system. Geography isn't a barrier — we work remotely with businesses nationwide." },
   { q: "What happens if I'm not happy with the results?",              a: "We stand behind the work. If your website and system aren't live within 48 hours as promised, you don't owe us for that period. For ongoing management, you're never locked in — if you feel the system isn't delivering, you can cancel with 30 days' notice. Our goal is to be the easiest vendor you've ever worked with." },
 ]
 
@@ -419,24 +415,20 @@ export default function Page() {
               We make local businesses<br /><em className="not-italic gold">look like industry leaders</em>
             </h2>
             <p ref={ref(10)} className="fu text-[#8A8880] text-lg max-w-lg mx-auto leading-[1.85] font-light" style={{ transitionDelay:"160ms" }}>
-              From HVAC to dental, we build the brand, website, and marketing system that makes you the obvious choice in your market — not just another option.
+              From roofing to med spas, we build the brand, website, and marketing system that makes high-ticket service businesses the obvious choice — not just another option.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
-              { icon:"🔧", name:"HVAC",        i:11, d:"0ms" },
-              { icon:"🔩", name:"Plumbing",    i:12, d:"60ms" },
-              { icon:"🦷", name:"Dental",      i:13, d:"120ms" },
-              { icon:"🏠", name:"Roofing",     i:14, d:"180ms" },
-              { icon:"⚡", name:"Electrical",  i:15, d:"240ms" },
-              { icon:"🌿", name:"Lawn Care",   i:16, d:"300ms" },
-              { icon:"🪟", name:"Windows",     i:17, d:"60ms" },
-              { icon:"🧹", name:"Cleaning",    i:18, d:"120ms" },
-              { icon:"💆", name:"Med Spa",     i:19, d:"180ms" },
-              { icon:"🐾", name:"Pet Care",    i:20, d:"240ms" },
-              { icon:"🚗", name:"Auto Repair", i:21, d:"300ms" },
-              { icon:"🏥", name:"Healthcare",  i:22, d:"360ms" },
+              { icon:"🔧", name:"HVAC",           i:11, d:"0ms" },
+              { icon:"🦷", name:"Dental",         i:12, d:"60ms" },
+              { icon:"🏠", name:"Roofing",        i:13, d:"120ms" },
+              { icon:"⚡", name:"Electrical",     i:14, d:"180ms" },
+              { icon:"🪟", name:"Windows",        i:15, d:"0ms" },
+              { icon:"💆", name:"Med Spa",        i:16, d:"60ms" },
+              { icon:"✨", name:"Car Detailing",  i:17, d:"120ms" },
+              { icon:"🏥", name:"Healthcare",     i:18, d:"180ms" },
             ].map(({ icon, name, i, d }) => (
               <button key={name} ref={ref(i)}
                    onClick={() => setSelectedIndustry(selectedIndustry === name ? null : name)}
