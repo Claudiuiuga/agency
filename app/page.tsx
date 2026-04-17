@@ -996,9 +996,40 @@ export default function Page() {
           {/* Email capture — not ready to call yet */}
           <div className="mb-10 max-w-md mx-auto">
             <p className="text-[#8A8880] text-xs tracking-wide mb-3 uppercase font-medium">Not ready to call? Get the free guide instead.</p>
-            <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex gap-2" onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
+              const btn = form.querySelector('button') as HTMLButtonElement;
+              if (!emailInput?.value) return;
+              btn.textContent = "Sending...";
+              btn.disabled = true;
+              try {
+                const res = await fetch("https://api.web3forms.com/submit", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    access_key: "f58e06f0-5c54-42af-b6a6-9f0ca51613ab",
+                    email: emailInput.value,
+                    subject: "New lead from Scalero — Free Guide Request",
+                    from_name: "Scalero Website",
+                  }),
+                });
+                if (res.ok) {
+                  btn.textContent = "Sent ✓";
+                  emailInput.value = "";
+                } else {
+                  btn.textContent = "Error — retry";
+                  btn.disabled = false;
+                }
+              } catch {
+                btn.textContent = "Error — retry";
+                btn.disabled = false;
+              }
+            }}>
               <input
                 type="email"
+                required
                 placeholder="your@email.com"
                 className="flex-1 bg-[rgba(139,92,246,0.05)] border border-[rgba(139,92,246,0.18)] rounded-full px-5 py-3 text-sm text-[#F0EFE8] placeholder-[#3A3A38] outline-none focus:border-[rgba(139,92,246,0.45)] transition-colors"
               />
