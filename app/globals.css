@@ -53,3 +53,9 @@ body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
 }
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: scale(1); }
+  70% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(0.95); }
+}
