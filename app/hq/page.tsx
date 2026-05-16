@@ -1418,6 +1418,15 @@ function HQGame({ lobby, onLeave }: { lobby: LobbyState; onLeave: () => void }) 
   const hasSyncedQuestsRef = useRef(false);
   const [onlineCount, setOnlineCount] = useState(1);
 
+  // Voice chat
+  const VOICE_RANGE = 150;
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
+  const audioElementsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const [micEnabled, setMicEnabled] = useState(false);
+  const [voiceNearby, setVoiceNearby] = useState<string[]>([]);
+  const pendingCandidatesRef = useRef<Map<string, RTCIceCandidateInit[]>>(new Map());
+
   const [currentRoom, setCurrentRoom] = useState<RoomId | null>(null);
   const [currentInteractable, setCurrentInteractable] =
     useState<Interactable | null>(null);
@@ -1669,6 +1678,53 @@ function HQGame({ lobby, onLeave }: { lobby: LobbyState; onLeave: () => void }) 
           setTasksByRoom(remoteTasks);
         }
       })
+      .on("broadcast", { event: "webrtc_offer" }, async ({ payload }) => {
+        if (!payload || payload.to !== lobby.playerId) return;
+        const fromId = payload.from as string;
+        const stream = localStreamRef.current;
+        if (!stream) return;
+
+        let pc = peerConnectionsRef.current.get(fromId);
+        if (pc) { pc.close(); peerConnectionsRef.current.delete(fromId); }
+
+        pc = createPeerConnection(fromId, channel);
+        peerConnectionsRef.current.set(fromId, pc);
+        stream.getTracks().forEach((t) => pc!.addTrack(t, stream));
+
+        await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+        const pending = pendingCandidatesRef.current.get(fromId) ?? [];
+        for (const c of pending) await pc.addIceCandidate(new RTCIceCandidate(c));
+        pendingCandidatesRef.current.delete(fromId);
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        channel.send({
+          type: "broadcast",
+          event: "webrtc_answer",
+          payload: { from: lobby.playerId, to: fromId, sdp: answer },
+        });
+      })
+      .on("broadcast", { event: "webrtc_answer" }, async ({ payload }) => {
+        if (!payload || payload.to !== lobby.playerId) return;
+        const pc = peerConnectionsRef.current.get(payload.from as string);
+        if (pc && pc.signalingState === "have-local-offer") {
+          await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+          const pending = pendingCandidatesRef.current.get(payload.from as string) ?? [];
+          for (const c of pending) await pc.addIceCandidate(new RTCIceCandidate(c));
+          pendingCandidatesRef.current.delete(payload.from as string);
+        }
+      })
+      .on("broadcast", { event: "webrtc_ice" }, async ({ payload }) => {
+        if (!payload || payload.to !== lobby.playerId) return;
+        const pc = peerConnectionsRef.current.get(payload.from as string);
+        if (pc && pc.remoteDescription) {
+          await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+        } else {
+          const pending = pendingCandidatesRef.current.get(payload.from as string) ?? [];
+          pending.push(payload.candidate);
+          pendingCandidatesRef.current.set(payload.from as string, pending);
+        }
+      })
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState();
         setOnlineCount(Object.keys(state).length);
@@ -1716,8 +1772,127 @@ function HQGame({ lobby, onLeave }: { lobby: LobbyState; onLeave: () => void }) 
       });
       supabase.removeChannel(channel);
       channelRef.current = null;
+      // Cleanup all peer connections
+      peerConnectionsRef.current.forEach((pc) => pc.close());
+      peerConnectionsRef.current.clear();
+      audioElementsRef.current.forEach((el) => { el.srcObject = null; el.remove(); });
+      audioElementsRef.current.clear();
     };
   }, [lobby.code, lobby.playerId, lobby.playerName, lobby.color]);
+
+  const RTC_CONFIG: RTCConfiguration = {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+    ],
+  };
+
+  function createPeerConnection(remoteId: string, channel: RealtimeChannel): RTCPeerConnection {
+    const pc = new RTCPeerConnection(RTC_CONFIG);
+
+    pc.onicecandidate = (e) => {
+      if (e.candidate) {
+        channel.send({
+          type: "broadcast",
+          event: "webrtc_ice",
+          payload: { from: lobby.playerId, to: remoteId, candidate: e.candidate.toJSON() },
+        });
+      }
+    };
+
+    pc.ontrack = (e) => {
+      let audio = audioElementsRef.current.get(remoteId);
+      if (!audio) {
+        audio = document.createElement("audio");
+        audio.autoplay = true;
+        (audio as unknown as HTMLVideoElement).playsInline = true;
+        audioElementsRef.current.set(remoteId, audio);
+      }
+      audio.srcObject = e.streams[0] ?? null;
+    };
+
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
+        pc.close();
+        peerConnectionsRef.current.delete(remoteId);
+        const audio = audioElementsRef.current.get(remoteId);
+        if (audio) { audio.srcObject = null; audio.remove(); audioElementsRef.current.delete(remoteId); }
+      }
+    };
+
+    return pc;
+  }
+
+  // Toggle mic
+  const toggleMic = useCallback(async () => {
+    if (micEnabled) {
+      localStreamRef.current?.getTracks().forEach((t) => t.stop());
+      localStreamRef.current = null;
+      peerConnectionsRef.current.forEach((pc) => pc.close());
+      peerConnectionsRef.current.clear();
+      audioElementsRef.current.forEach((el) => { el.srcObject = null; el.remove(); });
+      audioElementsRef.current.clear();
+      setMicEnabled(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        localStreamRef.current = stream;
+        setMicEnabled(true);
+      } catch {
+        /* user denied mic */
+      }
+    }
+  }, [micEnabled]);
+
+  // Voice proximity check — runs in game loop via ref
+  const checkVoiceProximity = useCallback(() => {
+    if (!micEnabled || !localStreamRef.current) return;
+    const ch = channelRef.current;
+    if (!ch) return;
+    const char = charRef.current;
+    const nearby: string[] = [];
+
+    remotePlayersRef.current.forEach((rp, id) => {
+      const dist = Math.hypot(rp.x - char.x, rp.y - char.y);
+      if (dist < VOICE_RANGE) {
+        nearby.push(rp.name);
+        // Adjust volume based on distance
+        const audio = audioElementsRef.current.get(id);
+        if (audio) {
+          audio.volume = Math.max(0, 1 - dist / VOICE_RANGE);
+        }
+        // Establish connection if not already connected
+        if (!peerConnectionsRef.current.has(id)) {
+          // Lower ID initiates to avoid both sides connecting
+          if (lobby.playerId < id) {
+            const pc = createPeerConnection(id, ch);
+            peerConnectionsRef.current.set(id, pc);
+            const stream = localStreamRef.current!;
+            stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+            pc.createOffer().then((offer) => {
+              pc.setLocalDescription(offer);
+              ch.send({
+                type: "broadcast",
+                event: "webrtc_offer",
+                payload: { from: lobby.playerId, to: id, sdp: offer },
+              });
+            });
+          }
+        }
+      } else {
+        // Out of range — tear down connection
+        const pc = peerConnectionsRef.current.get(id);
+        if (pc) {
+          pc.close();
+          peerConnectionsRef.current.delete(id);
+          const audio = audioElementsRef.current.get(id);
+          if (audio) { audio.srcObject = null; audio.remove(); audioElementsRef.current.delete(id); }
+        }
+      }
+    });
+
+    setVoiceNearby(nearby);
+  }, [micEnabled, lobby.playerId]);
 
   // Broadcast position — ~15Hz when moving, ~2Hz when idle.
   const broadcastPosition = useCallback(() => {
@@ -1849,6 +2024,8 @@ function HQGame({ lobby, onLeave }: { lobby: LobbyState; onLeave: () => void }) 
 
       // Always broadcast — even when idle, so others see you
       broadcastPosition();
+      // Voice proximity check every ~10 frames
+      if (tick % 10 === 0) checkVoiceProximity();
 
       // Room detection
       const room = detectRoom(char.x, char.y);
@@ -1962,6 +2139,15 @@ function HQGame({ lobby, onLeave }: { lobby: LobbyState; onLeave: () => void }) 
         ctx.fillRect(rp.x - tw / 2 - 2, rp.y + 10, tw + 4, 8);
         ctx.fillStyle = rp.color;
         ctx.fillText(rp.name, rp.x, rp.y + 16);
+        // Voice indicator
+        const dist = Math.hypot(rp.x - char.x, rp.y - char.y);
+        if (micEnabled && dist < VOICE_RANGE) {
+          const pulse = 0.6 + 0.4 * Math.sin(tick * 0.2);
+          ctx.fillStyle = `rgba(74, 222, 128, ${pulse.toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(rp.x, rp.y - 14, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.restore();
       });
 
@@ -2134,6 +2320,22 @@ function HQGame({ lobby, onLeave }: { lobby: LobbyState; onLeave: () => void }) 
             <span className="text-[9px] text-emerald-400">{onlineCount}</span>
             <span className="text-[8px] text-white/25">online</span>
           </div>
+          <button
+            type="button"
+            onClick={toggleMic}
+            className={`rounded-md border px-2.5 py-1 text-[10px] transition-colors ${
+              micEnabled
+                ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-400"
+                : "border-white/[0.1] bg-white/[0.03] text-white/60 hover:border-white/25 hover:text-white"
+            }`}
+          >
+            {micEnabled ? "🎙️ On" : "🎙️ Off"}
+          </button>
+          {micEnabled && voiceNearby.length > 0 && (
+            <span className="text-[8px] text-emerald-400/70">
+              🔊 {voiceNearby.join(", ")}
+            </span>
+          )}
           <button
             type="button"
             onClick={() => setShowQuestLog(true)}
